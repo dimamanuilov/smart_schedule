@@ -1,0 +1,3 @@
+id,day,start,end,required_people,required_skills,night_shift
+S1,mon,09:00,17:00,1,cashier,0
+S2,tue,10:00,18:00,1,support,0
