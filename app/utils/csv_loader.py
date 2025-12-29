@@ -1,41 +1,35 @@
 import pandas as pd
-from app.utils.time_utils import hhmm_to_minutes
+from app.domain.models import Employee, Shift
 
 
-def load_employees(path: str):
+def to_minutes(value: str) -> int:
+    h, m = value.split(":")
+    return int(h) * 60 + int(m)
+
+
+def load_employees(path: str) -> list[Employee]:
     df = pd.read_csv(path)
+    return [
+        Employee(
+            id=row["id"],
+            skills=row["skills"].split("|"),
+            max_hours=int(row["max_hours"]),
+            days=row["days"].split("|"),
+        )
+        for _, row in df.iterrows()
+    ]
 
-    employees = []
-    for _, row in df.iterrows():
-        employees.append({
-            "id": row["id"],
-            "skills": row["skills"].split("|"),
-            "max_hours": int(row["max_hours"]),
-            "days": row["days"].split("|")
-        })
-    return employees
 
-
-def load_shifts(path: str):
+def load_shifts(path: str) -> list[Shift]:
     df = pd.read_csv(path)
-
-    shifts = []
-    for _, row in df.iterrows():
-        start = hhmm_to_minutes(row["start"])
-        end = hhmm_to_minutes(row["end"])
-
-        duration = end - start
-        if duration < 0:
-            duration += 24 * 60  # ночная смена
-
-        shifts.append({
-            "id": row["id"],
-            "day": row["day"],
-            "start": start,
-            "end": end,
-            "duration": duration,
-            "required_people": int(row["required_people"]),
-            "required_skills": row["required_skills"].split("|"),
-            "night_shift": bool(row["night_shift"])
-        })
-    return shifts
+    return [
+        Shift(
+            id=row["id"],
+            day=row["day"],
+            start=to_minutes(row["start"]),
+            end=to_minutes(row["end"]),
+            required_people=int(row["required_people"]),
+            required_skills=row["required_skills"].split("|"),
+        )
+        for _, row in df.iterrows()
+    ]

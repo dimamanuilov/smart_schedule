@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Schedule</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Smart Schedule</h1>
+
+    <button onclick="runSolver()">Построить расписание</button>
+
+    <pre id="output">Нажмите кнопку…</pre>
+
+    <script>
+        async function runSolver() {
+            document.getElementById("output").innerText = "Считаем…";
+
+            const response = await fetch("/schedule/solve", {
+                method: "POST"
+            });
+
+            const data = await response.json();
+            document.getElementById("output").innerText =
+                JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>

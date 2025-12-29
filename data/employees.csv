@@ -1,3 +1,6 @@
 id,skills,max_hours,days
-E1,cashier|support,40,mon|tue
-E2,cashier,32,mon
+E1,cashier|support,40,mon|tue|wed|thu|fri
+E2,cashier,32,mon|wed|fri
+E3,support,24,tue|thu
+E4,cashier|support,20,mon|tue
+E5,cashier,40,mon|tue|wed|thu|fri

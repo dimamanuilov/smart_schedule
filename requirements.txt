@@ -1,4 +1,5 @@
 fastapi
 uvicorn
-ortools
 pandas
+ortools
+jinja2

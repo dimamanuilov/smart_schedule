@@ -1,65 +1,47 @@
 from ortools.sat.python import cp_model
+from app.domain.models import Employee, Shift
 
 
-def solve_schedule(employees, shifts):
-    model = cp_model.CpModel()
-    x = {}
+class ScheduleSolver:
+    def solve(self, employees: list[Employee], shifts: list[Shift]):
+        model = cp_model.CpModel()
+        x = {}
 
-    for e in employees:
+        for e in employees:
+            for s in shifts:
+                x[e.id, s.id] = model.NewBoolVar(f"x_{e.id}_{s.id}")
+
+        # покрытие смен
         for s in shifts:
-            x[e["id"], s["id"]] = model.NewBoolVar(
-                f"x_{e['id']}_{s['id']}"
+            model.Add(
+                sum(x[e.id, s.id] for e in employees) == s.required_people
             )
 
-    # Каждая смена должна быть покрыта
-    for s in shifts:
-        model.Add(
-            sum(x[e["id"], s["id"]] for e in employees)
-            == s["required_people"]
-        )
+        # часы
+        for e in employees:
+            model.Add(
+                sum(x[e.id, s.id] * s.hours for s in shifts)
+                <= e.max_hours
+            )
 
-    # Ограничение по часам
-    for e in employees:
-        model.Add(
-            sum(
-                x[e["id"], s["id"]] * s["duration"]
-                for s in shifts
-            ) <= e["max_hours"] * 60
-        )
+        # навыки и доступность
+        for e in employees:
+            for s in shifts:
+                if not set(s.required_skills).issubset(e.skills):
+                    model.Add(x[e.id, s.id] == 0)
+                if s.day not in e.days:
+                    model.Add(x[e.id, s.id] == 0)
 
-    # Навыки и дни
-    for e in employees:
-        for s in shifts:
-            if not set(s["required_skills"]).issubset(e["skills"]):
-                model.Add(x[e["id"], s["id"]] == 0)
+        solver = cp_model.CpSolver()
+        solver.parameters.max_time_in_seconds = 5
+        status = solver.Solve(model)
 
-            if s["day"] not in e["days"]:
-                model.Add(x[e["id"], s["id"]] == 0)
+        if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+            return []
 
-    # Минимизируем ночные смены
-    model.Minimize(
-        sum(
-            x[e["id"], s["id"]] * (3 if s["night_shift"] else 0)
+        return [
+            (e.id, s.id, s.day, s.hours)
             for e in employees
             for s in shifts
-        )
-    )
-
-    solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 5
-
-    status = solver.Solve(model)
-
-    if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
-        return []
-
-    assignments = []
-    for e in employees:
-        for s in shifts:
-            if solver.Value(x[e["id"], s["id"]]) == 1:
-                assignments.append({
-                    "employee": e["id"],
-                    "shift": s["id"]
-                })
-
-    return assignments
+            if solver.Value(x[e.id, s.id]) == 1
+        ]
