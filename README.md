@@ -39,7 +39,7 @@ cd \желаемый путь для копирования
 git clone https://github.com/dimamanuilov/smart_schedule.git
 ```
 
-### 2. Создаем зависимости
+### 2. Создаем виртуальное окружение и устанавливаем зависимости
 ```bash
 python -m venv smart_schedule
 smart_schedule\Scripts\activate
