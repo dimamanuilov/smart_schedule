@@ -33,7 +33,15 @@ Smart Schedule — это инструмент для автоматическо
 
 ## ▶️ Запуск проекта
 
-### 1. Создать виртуальное окружение
+### 1. Копируем репозиторий
 ```bash
-python -m venv venv
-venv\Scripts\activate
+cd \желаемый путь для копирования
+git clone https://github.com/dimamanuilov/smart_schedule.git
+```
+
+### 2. Создаем зависимости
+```bash
+python -m venv smart_schedule
+smart_schedule\Scripts\activate
+pip install -r *путь к папке с проектом*\requirements.txt
+```
